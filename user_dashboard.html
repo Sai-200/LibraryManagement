@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+            background-image: url("i5.webp");
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0;
+        }
+
+        .header-buttons {
+            display: flex;
+        }
+
+        .header-buttons button {
+            margin-left: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .header-buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        .book-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .book {
+            width: 48%;
+            margin-bottom: 20px;
+            box-sizing: border-box; /* Include padding and border in width calculation */
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .book img {
+            max-width: 100%;
+            max-height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .book-details {
+            overflow: hidden;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Additional styles for search bar */
+        #searchBarContainer {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #searchBar {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #searchButton {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        #searchButton:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>User Dashboard</h1>
+            <div class="header-buttons">
+                <button id="catalogButton" onclick="viewCatalog()">Catalog</button>
+                <button id="logoutButton" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        <!-- Search Bar and Catalog Button -->
+        <div id="searchBarContainer">
+            <input type="text" id="searchBar" placeholder="Search by Title, Author, ISBN, or Genre">
+            <button id="searchButton" onclick="searchBooks()">Search</button>
+        </div>
+        <!-- Book List -->
+        <div class="book-container" id="bookList"></div>
+    </div>
+
+    <script>
+
+        // Book class with encapsulation
+        class Book {
+            constructor(title, author, isbn, genre, imageUrl) {
+                this._title = title;
+                this._author = author;
+                this._isbn = isbn;
+                this._genre = genre;
+                this._availability = true;
+                this._imageUrl = imageUrl;
+            }
+
+            get title() {
+                return this._title;
+            }
+
+            get author() {
+                return this._author;
+            }
+
+            get isbn() {
+                return this._isbn;
+            }
+
+            get genre() {
+                return this._genre;
+            }
+
+            get availability() {
+                return this._availability;
+            }
+
+            set availability(value) {
+                this._availability = value;
+            }
+
+            get imageUrl() {
+                return this._imageUrl;
+            }
+        }
+
+        // LibraryCatalog class
+        class LibraryCatalog {
+            constructor() {
+                this._books = retrieveBooksFromLocalStorage();
+            }
+
+            displayAllBooks() {
+                return this._books;
+            }
+        }
+
+        // Creating an instance of the LibraryCatalog class
+        const libraryCatalog = new LibraryCatalog();
+
+        // Sample book data
+        const booksData = [
+            { title: "To Kill a Mockingbird", author: "Harper Lee", isbn: "978-0-06-112008-4", genre: "Fiction, Classic, Coming-of-Age", imageUrl: "b1.jpg" },
+            { title: "1984", author: "George Orwell", isbn: "978-0-452-28423-4", genre: "Fiction, Dystopian, Political", imageUrl: "b2.jpg" },
+            { title: "The Great Gatsby", author: "F. Scott Fitzgerald", isbn: "978-0-7432-7356-5", genre: "Fiction, Classic, Jazz Age", imageUrl: "b3.jpg" },
+            { title: "Harry Potter and the Sorcerer's Stone", author: "J.K. Rowling", isbn: "978-0-590-35340-3", genre: "Fiction, Fantasy, Young Adult", imageUrl: "b4.jpg" },
+            { title: "The Catcher in the Rye", author: "J.D. Salinger", isbn: "978-0-316-76948-0", genre: "Fiction, Coming-of-Age", imageUrl: "b5.jpg" },
+            { title: "Pride and Prejudice", author: "Jane Austen", isbn: "978-0-14-143951-8", genre: "Fiction, Classic, Romance", imageUrl: "b6.jpg" },
+            { title: "The Hobbit", author: "J.R.R. Tolkien", isbn: "978-0-618-34641-9", genre: "Fiction, Fantasy, Adventure", imageUrl: "b7.jpg" },
+            { title: "The Da Vinci Code", author: "Dan Brown", isbn: "978-0-307-27787-5", genre: "Fiction, Mystery, Thriller", imageUrl: "b8.jpg" },
+            { title: "The Hunger Games", author: "Suzanne Collins", isbn: "978-0-439-02348-1", genre: "Fiction, Science Fiction, Dystopian", imageUrl: "b9.jpg" },
+            { title: "The Lord of the Rings: The Fellowship of the Ring", author: "J.R.R. Tolkien", isbn: "978-0-618-34625-9", genre: "Fiction, Fantasy, Epic", imageUrl: "b10.webp" },
+            // Add more books here
+        ];
+
+        // Initialize books from sample data
+        booksData.forEach(bookData => {
+            const book = new Book(bookData.title, bookData.author, bookData.isbn, bookData.genre, bookData.imageUrl);
+            libraryCatalog._books.push(book);
+        });
+
+        // Function to display books only when the "Catalog" button is clicked
+        function displayBooksExplicitly(books) {
+            const bookListContainer = document.getElementById('bookList');
+            bookListContainer.innerHTML = '';
+
+            books.forEach(book => {
+                if (book.title && book.author && book.isbn && book.genre) {
+                    const bookDiv = document.createElement('div');
+                    bookDiv.classList.add('book');
+
+                    const img = document.createElement('img');
+                    img.src = book.imageUrl || 'default-image.jpg';
+                    img.alt = book.title;
+                    bookDiv.appendChild(img);
+
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.classList.add('book-details');
+                    detailsDiv.innerHTML = `<p><strong>Title:</strong> ${book.title}</p>
+                                            <p><strong>Author:</strong> ${book.author}</p>
+                                            <p><strong>ISBN:</strong> ${book.isbn}</p>
+                                            <p><strong>Genre:</strong> ${book.genre}</p>
+                                            <p><strong>Availability:</strong> ${book.availability ? 'Available' : 'Not Available'}</p>`;
+
+                    const orderButton = createButton('Order', () => orderBook(book.isbn));
+                    const returnButton = createButton('Return', () => returnBook(book.isbn));
+                    const checkoutButton = createButton('Checkout', () => checkoutBook(book.isbn));
+
+                    detailsDiv.appendChild(orderButton);
+                    detailsDiv.appendChild(returnButton);
+                    detailsDiv.appendChild(checkoutButton);
+
+                    bookDiv.appendChild(detailsDiv);
+
+                    bookListContainer.appendChild(bookDiv);
+                }
+            });
+        }
+        // Function to retrieve books from local storage
+        function retrieveBooksFromLocalStorage() {
+            const storedBooks = localStorage.getItem('books');
+            return storedBooks ? JSON.parse(storedBooks) : [];
+        }
+        // Function to toggle the display of books when the "Catalog" button is clicked
+        function toggleCatalog() {
+            const bookListContainer = document.getElementById('bookList');
+            const isCurrentlyVisible = bookListContainer.style.display !== 'none';
+
+            if (isCurrentlyVisible) {
+                bookListContainer.style.display = 'none';
+            } else {
+                // Retrieve books from local storage when the "Catalog" button is clicked
+                const booksToDisplay = retrieveBooksFromLocalStorage();
+                displayBooksExplicitly(booksToDisplay);
+                bookListContainer.style.display = 'flex'; // Show the book list
+            }
+        }
+
+
+       // Function to display books in the HTML
+       function displayBooks(books) {
+        const bookListContainer = document.getElementById('bookList');
+        bookListContainer.innerHTML = '';
+
+        books.forEach(book => {
+            if (book.title && book.author && book.isbn && book.genre) {
+                const bookDiv = document.createElement('div');
+                bookDiv.classList.add('book');
+
+                const img = document.createElement('img');
+                img.src = book.imageUrl || 'default-image.jpg';
+                img.alt = book.title;
+                bookDiv.appendChild(img);
+
+                const detailsDiv = document.createElement('div');
+                detailsDiv.classList.add('book-details');
+                detailsDiv.innerHTML = `<p><strong>Title:</strong> ${book.title}</p>
+                                        <p><strong>Author:</strong> ${book.author}</p>
+                                        <p><strong>ISBN:</strong> ${book.isbn}</p>
+                                        <p><strong>Genre:</strong> ${book.genre}</p>
+                                        <p><strong>Availability:</strong> ${book.availability ? 'Available' : 'Not Available'}</p>`;
+
+                // Add buttons for user actions (excluding the "Order" button)
+                const returnButton = createButton('Return', () => returnBook(book.isbn));
+                const checkoutButton = createButton('Checkout', () => checkoutBook(book.isbn));
+
+                detailsDiv.appendChild(returnButton);
+                detailsDiv.appendChild(checkoutButton);
+
+                bookDiv.appendChild(detailsDiv);
+
+                bookListContainer.appendChild(bookDiv);
+                }
+            });
+        }  
+
+        // Function to create a button
+        function createButton(text, onClick) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.addEventListener('click', onClick);
+            return button;
+        }
+
+        // Event handler for ordering a book
+        function orderBook(isbn) {
+            const book = libraryCatalog.displayAllBooks().find(b => b.isbn === isbn);
+            if (book && book.availability) {
+                alert(`Book "${book.title}" ordered successfully!`);
+            } else {
+                alert('Book is not available for order.');
+            }
+        }
+
+        // Event handler for returning a book
+        function returnBook(isbn) {
+            const book = libraryCatalog.displayAllBooks().find(b => b.isbn === isbn);
+            if (book && !book.availability) {
+                book.availability = true;
+                alert(`Book "${book.title}" returned successfully!`);
+            } else {
+                alert('Invalid return operation.');
+            }
+            displayBooks(libraryCatalog.displayAllBooks());
+            updateLocalStorage();
+        }
+
+        // Event handler for checking out a book
+        function checkoutBook(isbn) {
+            const book = libraryCatalog.displayAllBooks().find(b => b.isbn === isbn);
+            if (book && book.availability) {
+                book.availability = false;
+                alert(`Book "${book.title}" checked out successfully!`);
+            } else {
+                alert('Book is not available for checkout.');
+            }
+            displayBooks(libraryCatalog.displayAllBooks());
+            updateLocalStorage();
+        }
+
+        // Function to update localStorage with current book data
+        function updateLocalStorage() {
+            localStorage.setItem('books', JSON.stringify(libraryCatalog.displayAllBooks()));
+        }
+
+        // Function to search books
+        function searchBooks() {
+            const searchInput = document.getElementById('searchBar').value.toLowerCase();
+            const matchedBooks = libraryCatalog.displayAllBooks().filter(book =>
+                (book.title && book.title.toLowerCase().includes(searchInput)) ||
+                (book.author && book.author.toLowerCase().includes(searchInput)) ||
+                (book.isbn && book.isbn.toLowerCase().includes(searchInput)) ||
+                (book.genre && book.genre.toLowerCase().includes(searchInput))
+            );
+
+            displayBooks(matchedBooks);
+        }
+
+        // Event handler for viewing the catalog
+        function viewCatalog() {
+            // Retrieve books from local storage when the "Catalog" button is clicked
+            const booksToDisplay = retrieveBooksFromLocalStorage();
+            displayBooksExplicitly(booksToDisplay);
+        }
+        function logout() {
+        // Add any additional logout logic if needed
+
+        // Redirect to the signup page (replace 'signup.html' with your actual signup page)
+        window.location.href = 'signup.html';
+        }
+    </script>
+</body>
+
+</html>

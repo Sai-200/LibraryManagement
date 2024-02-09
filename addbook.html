@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a Book</title>
+    <style>
+        /* Your styling for the form goes here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Add a Book</h1>
+        <form id="addBookForm">
+            <label for="title">Title:</label>
+            <input type="text" id="title" required>
+
+            <label for="author">Author:</label>
+            <input type="text" id="author" required>
+
+            <label for="isbn">ISBN:</label>
+            <input type="text" id="isbn" required>
+
+            <label for="genre">Genre:</label>
+            <input type="text" id="genre" required>
+
+            <button type="button" onclick="submitForm()">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        // Define the Book class
+        class Book {
+            constructor(title, author, isbn, genre, imageUrl) {
+                this.title = title;
+                this.author = author;
+                this.isbn = isbn;
+                this.genre = genre;
+                this.imageUrl = imageUrl;
+            }
+        }
+
+        // Define the LibraryCatalog class
+        class LibraryCatalog {
+            constructor() {
+                this.books = [];
+            }
+
+            addBook(book) {
+                this.books.push(book);
+            }
+
+            displayAllBooks() {
+                return this.books;
+            }
+        }
+
+        // Function to update localStorage with the current libraryCatalog data
+        function updateLocalStorage() {
+            const booksJSON = JSON.stringify(libraryCatalog.displayAllBooks());
+            localStorage.setItem('books', booksJSON);
+        }
+
+        // Retrieve the libraryCatalog instance from localStorage
+        const storedBooks = localStorage.getItem('books');
+        const libraryCatalog = new LibraryCatalog();
+
+        // Initialize the libraryCatalog with stored data (if available)
+        if (storedBooks) {
+            const parsedBooks = JSON.parse(storedBooks);
+            parsedBooks.forEach(bookData => {
+                const book = new Book(bookData.title, bookData.author, bookData.isbn, bookData.genre, bookData.imageUrl);
+                libraryCatalog.addBook(book);
+            });
+        }
+
+        function submitForm() {
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const isbn = document.getElementById('isbn').value;
+            const genre = document.getElementById('genre').value;
+
+            // Check if the ISBN already exists in the catalog
+            const existingBook = libraryCatalog.displayAllBooks().find(b => b.isbn === isbn);
+
+            if (!existingBook) {
+                const newBook = new Book(title, author, isbn, genre, ''); // Replace '' with the actual image URL
+                libraryCatalog.addBook(newBook);
+                updateLocalStorage();
+                alert(`Book "${newBook.title}" added successfully!`);
+                // Redirect to the dashboard page after showing the alert
+                window.location.href = 'admin_dashboard.html';
+            } else {
+                alert('Book with the same ISBN already exists in the catalog.');
+            }
+        }
+    </script>
+</body>
+
+</html>

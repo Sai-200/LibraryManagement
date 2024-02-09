@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .book-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .book {
+            width: 48%; /* Adjust as needed */
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .book img {
+            max-width: 100%;
+            max-height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .book-details {
+            overflow: hidden;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Library Dashboard</h1>
+
+        <!-- Book List -->
+        <div class="book-container" id="bookList"></div>
+    </div>
+
+    <script>
+        // Book class with encapsulation
+        class Book {
+            constructor(title, author, isbn, genre, imageUrl) {
+                this._title = title;
+                this._author = author;
+                this._isbn = isbn;
+                this._genre = genre;
+                this._availability = true; // Newly added books are available by default
+                this._imageUrl = imageUrl;
+            }
+
+            get title() {
+                return this._title;
+            }
+
+            get author() {
+                return this._author;
+            }
+
+            get isbn() {
+                return this._isbn;
+            }
+
+            get genre() {
+                return this._genre;
+            }
+
+            get availability() {
+                return this._availability;
+            }
+
+            set availability(value) {
+                this._availability = value;
+            }
+
+            get imageUrl() {
+                return this._imageUrl;
+            }
+        }
+
+        // LibraryCatalog class
+        class LibraryCatalog {
+            constructor() {
+                this._books = [];
+            }
+
+            addBook(book) {
+                this._books.push(book);
+            }
+
+            removeBook(isbn) {
+                this._books = this._books.filter(book => book.isbn !== isbn);
+            }
+
+            displayAllBooks() {
+                return this._books;
+            }
+        }
+
+        // Creating an instance of the LibraryCatalog class
+        const libraryCatalog = new LibraryCatalog();
+
+        // Sample book data
+        const booksData = [
+            { title: "To Kill a Mockingbird", author: "Harper Lee", isbn: "978-0-06-112008-4", genre: "Fiction, Classic, Coming-of-Age", imageUrl: "url_to_mockingbird_image.jpg" },
+            { title: "1984", author: "George Orwell", isbn: "978-0-452-28423-4", genre: "Fiction, Dystopian, Political", imageUrl: "url_to_1984_image.jpg" },
+            { title: "The Great Gatsby", author: "F. Scott Fitzgerald", isbn: "978-0-7432-7356-5", genre: "Fiction, Classic, Jazz Age", imageUrl: "url_to_gatsby_image.jpg" },
+            // Add more book data with imageUrl
+        ];
+
+        // Initialize books from sample data
+        booksData.forEach(bookData => {
+            const book = new Book(bookData.title, bookData.author, bookData.isbn, bookData.genre, bookData.imageUrl);
+            libraryCatalog.addBook(book);
+        });
+
+        // Function to display books in the HTML
+        function displayBooks(books) {
+            const bookListContainer = document.getElementById('bookList');
+            bookListContainer.innerHTML = '';
+
+            books.forEach(book => {
+                const bookElement = document.createElement('div');
+                bookElement.classList.add('book');
+
+                // Add book image
+                const imgElement = document.createElement('img');
+                imgElement.src = book.imageUrl;
+                bookElement.appendChild(imgElement);
+
+                // Add book details
+                const detailsElement = document.createElement('div');
+                detailsElement.classList.add('book-details');
+                detailsElement.innerHTML = `<strong>Title:</strong> ${book.title}<br>
+                                            <strong>Author:</strong> ${book.author}<br>
+                                            <strong>ISBN:</strong> ${book.isbn}<br>
+                                            <strong>Genre:</strong> ${book.genre}<br>
+                                            <strong>Availability:</strong> ${book.availability ? 'Available' : 'Not Available'}`;
+
+                // Add action buttons
+                const addButton = createButton('Add', () => addBook(book));
+                const returnButton = createButton('Return', () => returnBook(book.isbn));
+                const removeButton = createButton('Remove', () => removeBook(book.isbn));
+                const checkoutButton = createButton('Checkout', () => checkoutBook(book.isbn));
+
+                detailsElement.appendChild(addButton);
+                detailsElement.appendChild(returnButton);
+                detailsElement.appendChild(removeButton);
+                detailsElement.appendChild(checkoutButton);
+
+                bookElement.appendChild(detailsElement);
+
+                bookListContainer.appendChild(bookElement);
+            });
+        }
+
+        // Function to create a button with a callback function
+        function createButton(text, callback) {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.addEventListener('click', callback);
+            return button;
+        }
+
+        // Event handler for adding a book
+        function addBook(book) {
+            // You can implement the logic to add a book to the library catalog
+            // and update the display accordingly
+        }
+
+        // Event handler for removing a book
+        function removeBook(isbn) {
+            libraryCatalog.removeBook(isbn);
+            displayBooks(libraryCatalog.displayAllBooks());
+            updateLocalStorage();
+        }
+
+        // Event handler for checking out a book
+        function checkoutBook(isbn) {
+            const book = libraryCatalog.displayAllBooks().find(b => b.isbn === isbn);
+            if (book && book.availability) {
+                book.availability = false;
+                alert(`Book "${book.title}" checked out successfully!`);
+            } else {
+                alert('Book is not available for checkout.');
+            }
+            displayBooks(libraryCatalog.displayAllBooks());
+            updateLocalStorage();
+        }
+
+        // Event handler for returning a book
+        function returnBook(isbn) {
+            const book = libraryCatalog.displayAllBooks().find(b => b.isbn === isbn);
+            if (book && !book.availability) {
+                book.availability = true;
+                alert(`Book "${book.title}" returned successfully!`);
+            } else {
+                alert('Invalid return operation.');
+            }
+            displayBooks(libraryCatalog.displayAllBooks());
+            updateLocalStorage();
+        }
+
+        // Function to update localStorage with current book data
+        function updateLocalStorage() {
+            localStorage.setItem('books', JSON.stringify(libraryCatalog.displayAllBooks()));
+        }
+
+        // Initial display of books
+        displayBooks(libraryCatalog.displayAllBooks());
+    </script>
+</body>
+
+</html>

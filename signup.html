@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url("i3.jpg") no-repeat center center fixed; 
+            background-size: cover;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+        }
+
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: white;
+        }
+
+        h2 {
+            color: #dddaeb;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            color: white;
+        }
+
+        select {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            width: 300px;
+            font-size: 16px;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            width: 300px;
+            font-size: 16px;
+        }
+
+        #error-message {
+            color: #ff0000;
+            margin-top: 10px;
+        }
+
+        a {
+            color: #dddaeb; 
+            text-decoration: none; 
+        }
+
+        a:hover {
+            color: #ff0000; 
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5445a0;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-container">
+        <h1>Sign Up</h1>
+        
+        <form onsubmit="return validateSignUp()">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+            <label for="userType">Select User Type:</label>
+            <select id="userType" name="userType" required>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <button type="submit">Sign Up</button>
+        </form>
+
+        <p id="error-message"></p>
+
+        <a href="login.html">Already have an account? Log In</a>
+    </div>
+
+    <script>
+        function validateSignUp() {
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            var errorMessage = document.getElementById('error-message');
+            var confirmPassword = document.getElementById("confirmPassword").value;
+            var userType = document.getElementById("userType").value;
+
+            // Password validation
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password) || !/[@$!%*?&]/.test(password)) {
+                errorMessage.innerHTML = "Password must be at least 8 characters and include a number, a special character, an uppercase, and a lowercase letter.";
+                return false;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessage.innerHTML = "Password and Confirm Password do not match.";
+                return false;
+            }
+
+            // Retrieve existing users from localStorage
+            var existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Check if the user with the same email already exists
+            var existingUser = existingUsers.find(user => user.email === email);
+
+            if (existingUser) {
+                errorMessage.innerHTML = "User with this email already exists. Please use a different email.";
+            } else {
+                // Check if an admin already exists
+                var adminExists = existingUsers.some(user => user.type === 'admin');
+
+                if (userType === 'admin' && adminExists) {
+                    errorMessage.innerHTML = "An admin already exists. Only one admin is allowed.";
+                } else {
+                    // Add user data to localStorage
+                    var newUser = { name: name, email: email, password: password, type: userType };
+                    existingUsers.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(existingUsers));
+
+                    // Redirect to login page or perform other actions
+                    alert("Sign up successful!");
+                    window.location.href = "login.html";
+                }
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>

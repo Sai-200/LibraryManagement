@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <title>Welcome to Our Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            
+            background: url("i4.webp") no-repeat center center fixed; 
+            background-size: cover;
+            text-align: center;
+            padding: 250px;
+            margin: 0;
+        }
+
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #9b1e8e;
+        }
+
+        h2 {
+            color: #9b1e8e;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5445a0;
+        }
+    </style>
+</head>
+<body>
+    <div class="center-container">
+        <h1>Welcome to our Library</h1>
+        <h2>Books open doors to worlds unseen; libraries are the gateways to endless dreams.</h2>
+        
+        <div class="button-container">
+            <button onclick="window.location.href='signup.html'">Sign Up</button>
+            <button onclick="window.location.href='login.html'">Log In</button>
+        </div>
+    </div>
+</body>
+</html>
